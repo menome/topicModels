@@ -1,0 +1,11 @@
+{
+  "CONNECTION_STRING":"amqp://rabbitmq:rabbitmq@rabbit:5672?heartbeat=3600",
+  "DB_ADDRESS":"bolt://neo4j:7687",
+  "DB_USER":"neo4j",
+  "DB_PASS":"graphPaper!",
+  "CORPUS_ADDRESS": "/config/corpus.mm",
+  "LDA_MODEL_ADDRESS": "/config/wiki_Model/en_wiki_001.lda",
+  "DICT_ADDRESS": "/config/wiki_Model/en_wiki_001.dict",
+  "NUM_TOPICS": 100,
+  "NUM_TOPIC_LINKS":5
+}

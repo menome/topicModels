@@ -1,0 +1,6 @@
+pika
+logging
+gensim
+NLTK
+stop_words
+neo4j-driver
