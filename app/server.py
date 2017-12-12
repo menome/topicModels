@@ -2,6 +2,7 @@
 import time
 import logging
 import uuid
+import os
 ##for rmq
 import pika
 ##for config and node data
@@ -10,19 +11,17 @@ import json
 from gensim import corpora, models, similarities, parsing
 ##for graph database access
 from neo4j.v1 import GraphDatabase, basic_auth
+from neo4j.util import watch
+from sys import stdout
 
+watch("neo4j.bolt", logging.WARNING, stdout)
 
 #Log format
 LOG_FORMAT = ('%(levelname) -10s %(asctime)s %(name) -30s %(funcName) '
               '-35s %(lineno) -5d: %(message)s')
 LOGGER = logging.getLogger(__name__)
 ##Configuration file address, for dockerized run
-CONFIG_ADDRESS = "/config/config.json"
-
-
-
-
-
+CONFIG_ADDRESS = "./config/config.json"
 
 ################################
 ######TOPIC MODELING CODE#######
@@ -36,11 +35,15 @@ class TopicModeler():
         #self.corpus = corpora.MmCorpus(config["CORPUS_ADDRESS"])
         self.dictionary = corpora.Dictionary.load_from_text(config["DICT_ADDRESS"])
         self.lda = models.LdaModel.load(config["LDA_MODEL_ADDRESS"])
+
         #loads all of the information needed to model topics
         #that is the corpus, dictionary and model
-        uri = config["DB_ADDRESS"]
-        user = config["DB_USER"]
-        password = config["DB_PASS"]
+
+        # Load DB info. Let os environment variables override this.
+        uri = os.environ.get('DB_ADDRESS',config["DB_ADDRESS"])
+        user = os.environ.get('DB_USER',config["DB_USER"])
+        password = os.environ.get('DB_PASS',config["DB_PASS"])
+
         #now we need to connect to the database instance so we can add our models to the graph
         time.sleep(5)
         self._driver = GraphDatabase.driver(uri, auth=(user,password),encrypted=True)
@@ -74,7 +77,7 @@ class TopicModeler():
                 if(j<5):
                     des += (term[0] + ", ")
                 session.write_transaction(lambda tx: self.linkTopicWords(tx, str(i), term[0], term[1]))
-            LOGGER.info(des[:-1])
+            # LOGGER.info(des[:-1])
             session.write_transaction(lambda tx: self.addTopicDescription(tx, str(i),des[:-2]))
         return session.close()
 
@@ -88,12 +91,12 @@ class TopicModeler():
     def modelDoc(self, data):
         #input should be the message off the bus
         #first we need to grab the key used to grab the node from the graph
-        LOGGER.info(data)
+        # LOGGER.info(data)
         self.key = str(data["Key"])
-        self.prunedUri = self.key
+        # self.prunedUri = self.key
         #Article uri keys are the whole URL, whereas file URI's are relative location paths
-        if(data["EventType"] != "ModelArticle"):
-            self.prunedUri = self.key[self.key.find("/")+1:]
+        # if(data["EventType"] != "ModelArticle"):
+            # self.prunedUri = self.key[self.key.find("/")+1:]
         LOGGER.info(self.prunedUri)
         #then we need to query the graph for the fulltext of that node
         session = self._driver.session()
@@ -174,7 +177,7 @@ class RMQConsumer(object):
         self._channel = None
         self._closing = False
         self._consumer_tag = None
-        self._url = config["CONNECTION_STRING"]
+        self._url = os.environ.get('CONNECTION_STRING',config["CONNECTION_STRING"])
 
         #Here is where we set up the modeler and stuff
         self.tm = TopicModeler(config)
