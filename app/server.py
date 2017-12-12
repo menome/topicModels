@@ -93,7 +93,7 @@ class TopicModeler():
         #first we need to grab the key used to grab the node from the graph
         # LOGGER.info(data)
         self.key = str(data["Key"])
-        # self.prunedUri = self.key
+        self.prunedUri = str(data["Key"])
         #Article uri keys are the whole URL, whereas file URI's are relative location paths
         # if(data["EventType"] != "ModelArticle"):
             # self.prunedUri = self.key[self.key.find("/")+1:]
