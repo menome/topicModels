@@ -80,10 +80,10 @@ class TopicModeler():
 
 
     def addTopicDescription(self, tx, tnum, des):
-       return tx.run("MATCH (t: Topic:Card {Code: {tnum}}) SET t.Description = {des}",{"tnum":tnum,"des":des})
+       return tx.run("MATCH (t: Topic:Facet {Code: {tnum}}) SET t.Description = {des}",{"tnum":tnum,"des":des})
 
     def linkTopicWords(self, tx, tnum, word, weight):
-        return tx.run("MERGE (t: Topic:Card {Code: {tnum}}) ON CREATE SET t.Name = {tnum}, t.Uuid = apoc.create.uuid() MERGE (w: Word:Card {Name: {word}}) ON CREATE SET w.Uuid = apoc.create.uuid() MERGE (t)-[r:References {weight:{weight}}]->(w)",{"tnum":tnum,"word":word, "weight":weight})
+        return tx.run("MERGE (t: Topic:Facet {Code: {tnum}}) ON CREATE SET t.Name = {tnum}, t.Uuid = apoc.create.uuid() MERGE (w: Word:Facet {Name: {word}}) ON CREATE SET w.Uuid = apoc.create.uuid() MERGE (t)-[r:HAS_FACET {weight:{weight}}]->(w)",{"tnum":tnum,"word":word, "weight":weight})
 
     def modelDoc(self, data):
         #input should be the message off the bus
@@ -125,7 +125,7 @@ class TopicModeler():
         return session.close()
 
     def linkTopics(self, tx, tnum, weight):
-        return tx.run("MATCH (t: Topic:Card {Code: {tnum}}) WITH t MATCH (f: Card {Uri: {key}}) MERGE (f)-[c:Classified]->(t) ON CREATE SET c.weight = {weight}",{"tnum":tnum,"key":self.prunedUri, "weight":weight})
+        return tx.run("MATCH (t: Topic:Facet {Code: {tnum}}) WITH t MATCH (f: Card {Uri: {key}}) MERGE (f)-[c:HAS_FACET]->(t) ON CREATE SET c.weight = {weight}",{"tnum":tnum,"key":self.prunedUri, "weight":weight})
 
 
     def matchNode(self, tx):
