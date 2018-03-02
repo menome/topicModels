@@ -7,6 +7,7 @@ import os
 import pika
 ##for config and node data
 import json
+import numpy as np
 ##for topic modeler
 from gensim import corpora, models, similarities, parsing
 ##for graph database access
@@ -33,7 +34,7 @@ class TopicModeler():
         self.num_topic_links = int(config["NUM_TOPIC_LINKS"])
         self.num_topics = int(config["NUM_TOPICS"])
         #self.corpus = corpora.MmCorpus(config["CORPUS_ADDRESS"])
-        self.dictionary = corpora.Dictionary.load_from_text(config["DICT_ADDRESS"])
+        self.dictionary = corpora.Dictionary.load(config["DICT_ADDRESS"])
         self.lda = models.LdaModel.load(config["LDA_MODEL_ADDRESS"])
 
         #loads all of the information needed to model topics
@@ -68,10 +69,10 @@ class TopicModeler():
         session.write_transaction(lambda tx: tx.run("CREATE CONSTRAINT ON (a:Word) ASSERT a.Name IS UNIQUE"))
         session.write_transaction(lambda tx: tx.run("CREATE CONSTRAINT ON (a:Topic) ASSERT a.Name IS UNIQUE"))
 
-
         #For every word in every topic, link the word node to the topic node
         for i,topic in enumerate(topics):
             #create a discription string
+            print(topic)
             des = ""
             for j,term in enumerate(topic[1]):
                 if(j<5):
@@ -86,7 +87,7 @@ class TopicModeler():
        return tx.run("MATCH (t: Topic:Facet {Code: {tnum}}) SET t.Description = {des}",{"tnum":tnum,"des":des})
 
     def linkTopicWords(self, tx, tnum, word, weight):
-        return tx.run("MERGE (t: Topic:Facet {Code: {tnum}}) ON CREATE SET t.Name = {tnum}, t.Uuid = apoc.create.uuid() MERGE (w: Word:Facet {Name: {word}}) ON CREATE SET w.Uuid = apoc.create.uuid() MERGE (t)-[r:HAS_FACET {weight:{weight}}]->(w)",{"tnum":tnum,"word":word, "weight":weight})
+        return tx.run("MERGE (t: Topic:Facet {Code: {tnum}}) ON CREATE SET t.Name = {tnum}, t.Uuid = apoc.create.uuid() MERGE (w: Word:Facet {Name: {word}}) ON CREATE SET w.Uuid = apoc.create.uuid() MERGE (t)-[r:HAS_FACET {weight:{weight}}]->(w)",{"tnum":tnum,"word":word, "weight":np.float64(weight)})
 
     def modelDoc(self, data):
         #input should be the message off the bus
