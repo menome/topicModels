@@ -34,7 +34,7 @@ class TopicModeler():
         self.num_topic_links = int(config["NUM_TOPIC_LINKS"])
         self.num_topics = int(config["NUM_TOPICS"])
         #self.corpus = corpora.MmCorpus(config["CORPUS_ADDRESS"])
-        self.dictionary = corpora.Dictionary.load(config["DICT_ADDRESS"])
+        self.dictionary = corpora.Dictionary.load_from_text(config["DICT_ADDRESS"])
         self.lda = models.LdaModel.load(config["LDA_MODEL_ADDRESS"])
 
         #loads all of the information needed to model topics
