@@ -164,7 +164,7 @@ class RMQConsumer(object):
         LOGGER.info('Declaring exchange %s', exchange_name)
         self._channel.exchange_declare(self.on_exchange_declareok,
                                        exchange_name,
-                                       self.EXCHANGE_TYPE)
+                                       self.EXCHANGE_TYPE, Durable=True)
 
     def on_exchange_declareok(self, unused_frame):
         """Invoked by pika when RabbitMQ has finished the Exchange.Declare RPC
@@ -185,7 +185,7 @@ class RMQConsumer(object):
 
         """
         LOGGER.info('Declaring queue %s', queue_name)
-        self._channel.queue_declare(self.on_queue_declareok, queue_name)
+        self._channel.queue_declare(self.on_queue_declareok, queue_name, Durable=True)
 
     def on_queue_declareok(self, method_frame):
         """Method invoked by pika when the Queue.Declare RPC call made in
