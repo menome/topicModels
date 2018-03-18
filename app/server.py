@@ -107,7 +107,7 @@ class TopicModeler():
             LOGGER.info("Fulltext for document missing, skipping document.")
             return session.close()
 
-        #LOGGER.info(text)
+        LOGGER.info(text)
 
         if not text[0]:
             return session.close()
@@ -122,6 +122,7 @@ class TopicModeler():
         LOGGER.info(doc_topics)
         #THROW THAT SHIT IN THE GRAPH WADDUP
         for i,topic in enumerate(doc_topics):
+            LOGGER.info("topic : " + str(i))
             if i<self.num_topic_links:
                 session.write_transaction(lambda tx: self.linkTopics(tx,str(topic[0]),topic[1]))
         #LOGGER.info(doc_topics)
@@ -129,7 +130,7 @@ class TopicModeler():
         return session.close()
 
     def linkTopics(self, tx, tnum, weight):
-        return tx.run("MATCH (t: Topic:Facet {Code: {tnum}}) WITH t MATCH (f: File {Uri: {key}}) MERGE (f)-[c:HAS_FACET]->(t) ON CREATE SET c.weight = {weight}",{"tnum":tnum,"key":self.prunedUri, "weight":weight})
+        return tx.run("MATCH (t: Topic:Facet {Code: {tnum}}) WITH t MATCH (f: File {Uri: {key}}) MERGE (f)-[c:HAS_FACET]->(t) ON CREATE SET c.weight = {weight}",{"tnum":tnum,"key":self.prunedUri, "weight":np.float64(weight)})
 
 
     def matchNode(self, tx):
@@ -164,7 +165,7 @@ class RMQConsumer(object):
     """
     EXCHANGE = 'fanExchange'
     EXCHANGE_TYPE = 'fanout'
-    QUEUE = ''
+    QUEUE = 'topic_model'
     ROUTING_KEY = 'fanExchange.added'
 
     def __init__(self, config):
