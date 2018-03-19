@@ -168,10 +168,10 @@ class RMQConsumer(object):
     commands that were issued and that should surface in the output as well.
 
     """
-    EXCHANGE = 'fanExchange'
+    EXCHANGE = 'topicmodeller'
     EXCHANGE_TYPE = 'topic'
     QUEUE = 'topic_model'
-    ROUTING_KEY = 'fanExchange.added'
+    ROUTING_KEY = 'topicmodeller.added'
 
     def __init__(self, config):
         """Create a new instance of the consumer class, passing in the AMQP
