@@ -1,5 +1,5 @@
 {
-  "CONNECTION_STRING":"amqp://rabbitmq:rabbitmq@rabbit:5672?heartbeat=3600",
+  "CONNECTION_STRING":"amqp://rabbitmq:rabbitmq@rabbit:5672?heartbeat=0",
   "DB_ADDRESS":"bolt://neo4j",
   "DB_USER":"neo4j",
   "DB_PASS":"graphPaper!",
