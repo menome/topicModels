@@ -8,6 +8,7 @@ import pika
 ##for config and node data
 import json
 import numpy as np
+import unidecode
 ##for topic modeler
 from gensim import corpora, models, similarities, parsing
 ##for graph database access
@@ -417,7 +418,7 @@ class RMQConsumer(object):
                     basic_deliver.delivery_tag, properties.app_id, body)
 
         #####Here is where actual work goes!
-        data = json.loads(body.encode('UTF-8'))
+        data = json.loads(unidecode.unidecode(body))
         if "Delete" not in str(data["EventType"]):
             self.tm.modelDoc(data)
 
