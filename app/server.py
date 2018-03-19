@@ -169,7 +169,7 @@ class RMQConsumer(object):
 
     """
     EXCHANGE = 'fanExchange'
-    EXCHANGE_TYPE = 'fanout'
+    EXCHANGE_TYPE = 'topic'
     QUEUE = 'topic_model'
     ROUTING_KEY = 'fanExchange.added'
 
