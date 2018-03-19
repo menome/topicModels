@@ -96,6 +96,7 @@ class TopicModeler():
         self.key = str(data["Key"])
         self.prunedUri = str(data["Key"])
         if".jpg" in (str(data["Key"])):
+            LOGGER.info("THIS IS A JPG WTF FUCK OFF")
             return 0
         #Article uri keys are the whole URL, whereas file URI's are relative location paths
         # if(data["EventType"] != "ModelArticle"):
@@ -105,6 +106,7 @@ class TopicModeler():
         session = self._driver.session()
         try:
             text = session.read_transaction(self.matchNode)
+            LOGGER.info("Got fulltext for node")
         except:
             LOGGER.info("Fulltext for document missing, skipping document.")
             return session.close()
