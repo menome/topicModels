@@ -417,7 +417,7 @@ class RMQConsumer(object):
                     basic_deliver.delivery_tag, properties.app_id, body)
 
         #####Here is where actual work goes!
-        data = json.loads(body)
+        data = json.loads(body.encode('UTF-8'))
         if "Delete" not in str(data["EventType"]):
             self.tm.modelDoc(data)
 
