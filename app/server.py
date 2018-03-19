@@ -424,6 +424,8 @@ class RMQConsumer(object):
                 self.tm.modelDoc(data)
         except:
             print "TM errored on incomming message"
+            self.acknowledge_message(basic_deliver.delivery_tag)
+
 
 
         self.acknowledge_message(basic_deliver.delivery_tag)
