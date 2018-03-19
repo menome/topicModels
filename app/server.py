@@ -101,7 +101,7 @@ class TopicModeler():
         #Article uri keys are the whole URL, whereas file URI's are relative location paths
         # if(data["EventType"] != "ModelArticle"):
             # self.prunedUri = self.key[self.key.find("/")+1:]
-        LOGGER.info(self.prunedUri)
+        LOGGER.info("its not a jpg"  + self.prunedUri)
         #then we need to query the graph for the fulltext of that node
         session = self._driver.session()
         try:
