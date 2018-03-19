@@ -418,9 +418,13 @@ class RMQConsumer(object):
                     basic_deliver.delivery_tag, properties.app_id, body)
 
         #####Here is where actual work goes!
-        data = json.loads(body.encode('ascii', 'ignore'))
-        if "Delete" not in str(data["EventType"]):
-            self.tm.modelDoc(data)
+        try:
+            data = json.loads(body.encode('ascii', 'ignore'))
+            if "Delete" not in str(data["EventType"]):
+                self.tm.modelDoc(data)
+        except:
+            print "TM errored on incomming message"
+
 
         self.acknowledge_message(basic_deliver.delivery_tag)
 
