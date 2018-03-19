@@ -95,6 +95,7 @@ class TopicModeler():
         # LOGGER.info(data)
         self.key = str(data["Key"])
         self.prunedUri = str(data["Key"])
+        if".jpg" in (str(data["Key"])) return 0
         #Article uri keys are the whole URL, whereas file URI's are relative location paths
         # if(data["EventType"] != "ModelArticle"):
             # self.prunedUri = self.key[self.key.find("/")+1:]
