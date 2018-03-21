@@ -153,14 +153,14 @@ class TopicModeler():
         return 
 
     def linkTopics(self, tx, tnum, weight):
-        return tx.run('MATCH (t: Topic:Facet {Code: {tnum}}) WITH t MATCH (f: File {Uri: {key}}) MERGE (f)-[c:HAS_FACET]->(t) ON CREATE SET c.weight = {weight}',{'tnum':tnum,'key':self.prunedUri, 'weight':np.float64(weight)})
+        return tx.run("MATCH (t: Topic:Facet {Code: {tnum}}) WITH t MATCH (f: File {Uri: {key}}) MERGE (f)-[c:HAS_FACET]->(t) ON CREATE SET c.weight = {weight}",{"tnum":tnum,"key":self.prunedUri, "weight":np.float64(weight)})
 
 
     def matchNode(self, tx):
-        return tx.run('MATCH (f: Card {Uri: {key}}) RETURN f.FullText',{'key':self.prunedUri}).single().values()
+        return tx.run("MATCH (f: Card {Uri: {key}}) RETURN f.FullText",{"key":self.prunedUri}).single().values()
 
     def matchArticleNode(self, tx):
-        return tx.run('MATCH (f: Article {Uri: {key}}) RETURN f',{'key':self.prunedUri}).summary()
+        return tx.run("MATCH (f: Article {Uri: {key}}) RETURN f",{"key":self.prunedUri}).summary()
 
    # def stir():
         #this function is used when we want to recoup the model and reclassify documents
