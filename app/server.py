@@ -65,11 +65,11 @@ class TopicModeler():
         session = self._driver.session()
         #if(session.read_transaction(lambda tx: tx.run("MATCH (t:Topic) RETURN COUNT(t)")) > 0):
         #    return session.close()
-
+        LOGGER.info("SETTING UP WTF?????")
         session.read_transaction(lambda tx: tx.run("MATCH (t:Topic) RETURN COUNT(t)"))
         session.write_transaction(lambda tx: tx.run("CREATE CONSTRAINT ON (a:Word) ASSERT a.Name IS UNIQUE"))
         session.write_transaction(lambda tx: tx.run("CREATE CONSTRAINT ON (a:Topic) ASSERT a.Name IS UNIQUE"))
-
+        LOGGER.info("SETTING UP (2) WTF?????")
         #For every word in every topic, link the word node to the topic node
         for i,topic in enumerate(topics):
             #create a discription string
