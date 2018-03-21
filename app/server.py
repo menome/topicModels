@@ -73,13 +73,13 @@ class TopicModeler():
         #For every word in every topic, link the word node to the topic node
         for i,topic in enumerate(topics):
             #create a discription string
-            print(topic)
+            #print(topic)
             des = ""
             for j,term in enumerate(topic[1]):
                 if(j<5):
                     des += (term[0] + ", ")
                 session.write_transaction(lambda tx: self.linkTopicWords(tx, str(i), term[0], term[1]))
-            # LOGGER.info(des[:-1])
+            LOGGER.info(des[:-1])
             session.write_transaction(lambda tx: self.addTopicDescription(tx, str(i),des[:-2]))
         return session.close()
 
@@ -90,59 +90,75 @@ class TopicModeler():
     def linkTopicWords(self, tx, tnum, word, weight):
         return tx.run("MERGE (t: Topic:Facet {Code: {tnum}}) ON CREATE SET t.Uuid = apoc.create.uuid() MERGE (w: Word:Facet {Name: {word}}) ON CREATE SET w.Uuid = apoc.create.uuid() MERGE (t)-[r:HAS_FACET {weight:{weight}}]->(w)",{"tnum":tnum,"word":word, "weight":np.float64(weight)})
 
-    def modelDoc(self, data):
+    def modelDoc(self, data, channel):
         #input should be the message off the bus
         #first we need to grab the key used to grab the node from the graph
         # LOGGER.info(data)
         self.key = str(data["Key"])
         self.prunedUri = str(data["Key"])
         if".jpg" in (str(data["Key"])):
-            LOGGER.info("THIS IS A JPG WTF FUCK OFF")
+            #LOGGER.info("THIS IS A JPG WTF FUCK OFF")
             return 0
         #Article uri keys are the whole URL, whereas file URI's are relative location paths
         # if(data["EventType"] != "ModelArticle"):
             # self.prunedUri = self.key[self.key.find("/")+1:]
-        LOGGER.info("its not a jpg"  + self.prunedUri)
+        #LOGGER.info("Modeling Document")
         #then we need to query the graph for the fulltext of that node
         session = self._driver.session()
         try:
             text = session.read_transaction(self.matchNode)
-            LOGGER.info("Got fulltext for node")
+            LOGGER.info("Modeling Document")
+            session.close()
         except:
             LOGGER.info("Fulltext for document missing, skipping document.")
             return session.close()
 
-        LOGGER.info(text)
+        #LOGGER.info(text)
 
         if not text[0]:
-            return session.close()
-                #Now we neeed to perform pre-processing on the fulltext from the node
+            return 
+        #Now we neeed to perform pre-processing on the fulltext from the node
         #That is to say. Lowercased and stemmed and stopworded
         doc = parsing.preprocessing.preprocess_string(text[0])
         #turn it into a vector bag of
         vec_bow = corpora.Dictionary.doc2bow(self.dictionary, doc)
         #model that shiet with that lda bitch
         doc_topics = sorted(self.lda[vec_bow],key=lambda x: x[1],reverse=True)
-        LOGGER.info("Document modeled." + str(len(doc_topics)) + " relevant topics, capping to " + str(self.num_topic_links))
-        LOGGER.info(doc_topics)
-        #THROW THAT SHIT IN THE GRAPH WADDUP
+        #LOGGER.info("Document modeled." + str(len(doc_topics)) + " relevant topics, capping to " + str(self.num_topic_links))
+        #LOGGER.info(doc_topics)
+        #create the harvester message
+        
+        message = ({'NodeType':'File','Priority':2,'ConformedDimensions':{'Uri':self.prunedUri},'Properties':{},'Connections':[]})
+        #LOGGER.info(message)
         for i,topic in enumerate(doc_topics):
-            LOGGER.info("topic : " + str(i))
+            #LOGGER.info('topic : ' + str(i))
             if i<self.num_topic_links:
-                session.write_transaction(lambda tx: self.linkTopics(tx,str(topic[0]),topic[1]))
+                con = ({'Label':'Facet','NodeType':'Topic','RelType':'HAS_FACET','RelProps':{'Weight':str(topic[1])},'ForwardRel':True,'ConformedDimensions':{'Code':str(topic[0])}})
+                #LOGGER.info(con)
+                message['Connections'].append(con)
+
+        LOGGER.info("Publishing message to refinery")
+
+        channel.basic_publish(exchange='syncevents',routing_key='syncevents.harvester.updates.topicmodeler',body=json.dumps(message))
+
+        #want to replace this with a harvester message
+        # for i,topic in enumerate(doc_topics):
+        #     LOGGER.info('topic : ' + str(i))
+        #     if i<self.num_topic_links:
+        #         session.write_transaction(lambda tx: self.linkTopics(tx,str(topic[0]),topic[1]))
         #LOGGER.info(doc_topics)
         #now that we are done modeling the document close off this session
-        return session.close()
+        return 
 
     def linkTopics(self, tx, tnum, weight):
-        return tx.run("MATCH (t: Topic:Facet {Code: {tnum}}) WITH t MATCH (f: File {Uri: {key}}) MERGE (f)-[c:HAS_FACET]->(t) ON CREATE SET c.weight = {weight}",{"tnum":tnum,"key":self.prunedUri, "weight":np.float64(weight)})
+        return tx.run('MATCH (t: Topic:Facet {Code: {tnum}}) WITH t MATCH (f: File {Uri: {key}}) MERGE (f)-[c:HAS_FACET]->(t) ON CREATE SET c.weight = {weight}',{'tnum':tnum,'key':self.prunedUri, 'weight':np.float64(weight)})
 
 
     def matchNode(self, tx):
-        return tx.run("MATCH (f: Card {Uri: {key}}) RETURN f.FullText",{"key":self.prunedUri}).single().values()
+        return tx.run('MATCH (f: Card {Uri: {key}}) RETURN f.FullText',{'key':self.prunedUri}).single().values()
 
     def matchArticleNode(self, tx):
-        return tx.run("MATCH (f: Article {Uri: {key}}) RETURN f",{"key":self.prunedUri}).summary()
+        return tx.run('MATCH (f: Article {Uri: {key}}) RETURN f',{'key':self.prunedUri}).summary()
 
    # def stir():
         #this function is used when we want to recoup the model and reclassify documents
@@ -414,14 +430,14 @@ class RMQConsumer(object):
         :param str|unicode body: The message body
 
         """
-        LOGGER.info('Received message # %s from %s: %s',
-                    basic_deliver.delivery_tag, properties.app_id, body)
+        #LOGGER.info('Received message # %s from %s: %s',basic_deliver.delivery_tag, properties.app_id, body)
+        LOGGER.info("Recieved message")
 
         #####Here is where actual work goes!
         try:
             data = json.loads(body.encode('ascii', 'ignore'))
             if "Delete" not in str(data["EventType"]):
-                self.tm.modelDoc(data)
+                self.tm.modelDoc(data, self._channel)
         except:
             print "TM errored on incomming message"
             self.acknowledge_message(basic_deliver.delivery_tag)
