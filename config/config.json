@@ -3,9 +3,9 @@
   "DB_ADDRESS":"bolt://10.2.200.156",
   "DB_USER":"neo4j",
   "DB_PASS":"graphPaper!",
-  "CORPUS_ADDRESS": "model/corpus.mm",
-  "LDA_MODEL_ADDRESS": "model/model.lda",
-  "DICT_ADDRESS": "model/dictionary.dict",
+  "CORPUS_ADDRESS": "/model/corpus.mm",
+  "LDA_MODEL_ADDRESS": "/model/model.lda",
+  "DICT_ADDRESS": "/model/dictionary.dict",
   "NUM_TOPICS": 7,
   "NUM_TOPIC_LINKS":5
 }
