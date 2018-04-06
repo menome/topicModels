@@ -1,6 +1,6 @@
 {
-  "CONNECTION_STRING":"amqp://rabbitmq:rabbitmq@rabbit?heartbeat=3600",
-  "DB_ADDRESS":"bolt://neo4j",
+  "CONNECTION_STRING":"amqp://rabbitmq:rabbitmq@10.2.200.156?heartbeat=3600",
+  "DB_ADDRESS":"bolt://10.2.200.156",
   "DB_USER":"neo4j",
   "DB_PASS":"graphPaper!",
   "CORPUS_ADDRESS": "config/output/corpus.mm",
