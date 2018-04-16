@@ -33,7 +33,6 @@ class TopicModeler():
     def __init__(self, config):
         #first we need to set up and parse our config file
         self.num_topic_links = int(config["NUM_TOPIC_LINKS"])
-        self.num_topics = int(config["NUM_TOPICS"])
         #self.corpus = corpora.MmCorpus(config["CORPUS_ADDRESS"])
         self.dictionary = corpora.Dictionary.load_from_text(config["DICT_ADDRESS"])
         self.lda = models.LdaModel.load(config["LDA_MODEL_ADDRESS"])
@@ -60,7 +59,7 @@ class TopicModeler():
 
     def setupGraph(self):
         #this function takes the modeled topics and draws nodes for them in the graph
-        topics = self.lda.show_topics(self.num_topics, num_words=15, log=False, formatted=False)
+        topics = self.lda.show_topics(num_topics=-1, num_words=15, log=False, formatted=False)
         #also creates nodes for the words attahed to the topics and links them, creating a topic map
         session = self._driver.session()
         #if(session.read_transaction(lambda tx: tx.run("MATCH (t:Topic) RETURN COUNT(t)")) > 0):

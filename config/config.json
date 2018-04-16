@@ -6,6 +6,5 @@
   "CORPUS_ADDRESS": "/model/corpus.mm",
   "LDA_MODEL_ADDRESS": "/model/model.lda",
   "DICT_ADDRESS": "/model/dictionary.dict",
-  "NUM_TOPICS": 15,
   "NUM_TOPIC_LINKS":5
 }
