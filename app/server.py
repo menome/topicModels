@@ -134,7 +134,7 @@ class TopicModeler():
         for i,topic in enumerate(doc_topics):
             #LOGGER.info('topic : ' + str(i))
             if i<self.num_topic_links:
-                con = ({'Label':'Facet','NodeType':'Topic','RelType':'HAS_FACET','RelProps':{'Weight':str(topic[1])},'ForwardRel':True,'ConformedDimensions':{'Code':str(topic[0])}})
+                con = ({'Label':'Facet','NodeType':'Topic','RelType':'HAS_FACET','RelProps':{'Weight':np.float64(topic[1])},'ForwardRel':True,'ConformedDimensions':{'Code':str(topic[0])}})
                 #LOGGER.info(con)
                 message['Connections'].append(con)
 
