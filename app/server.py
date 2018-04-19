@@ -32,10 +32,10 @@ CONFIG_ADDRESS = "./config/config.json"
 class TopicModeler():
     def __init__(self, config):
         #first we need to set up and parse our config file
-        self.num_topic_links = int(config["NUM_TOPIC_LINKS"])
+        self.num_topic_links = int(os.environ.get("NUM_TOPIC_LINKS",config["NUM_TOPIC_LINKS"]))
         #self.corpus = corpora.MmCorpus(config["CORPUS_ADDRESS"])
-        self.dictionary = corpora.Dictionary.load_from_text(config["DICT_ADDRESS"])
-        self.lda = models.LdaModel.load(config["LDA_MODEL_ADDRESS"])
+        self.dictionary = corpora.Dictionary.load_from_text(os.environ.get("DICT_ADDRESS",config["DICT_ADDRESS"]))
+        self.lda = models.LdaModel.load(os.environ.get("LDA_MODEL_ADDRESS",config["LDA_MODEL_ADDRESS"]))
 
         #loads all of the information needed to model topics
         #that is the corpus, dictionary and model
@@ -48,7 +48,7 @@ class TopicModeler():
         #now we need to connect to the database instance so we can add our models to the graph
         time.sleep(5)
         self._driver = GraphDatabase.driver(uri, auth=(user,password),encrypted=True)
-        LOGGER.info('HEEEEEEEYYYYYOOOOOOOO- CONNECTED TO THE GRAPH')
+        #LOGGER.info('HEEEEEEEYYYYYOOOOOOOO- CONNECTED TO THE GRAPH')
         ##this statement prints out the topics and words with associated weight values
         #LOGGER.info(self.lda.show_topics(25,num_words=25,log=True,formatted=False))
 
@@ -64,11 +64,11 @@ class TopicModeler():
         session = self._driver.session()
         #if(session.read_transaction(lambda tx: tx.run("MATCH (t:Topic) RETURN COUNT(t)")) > 0):
         #    return session.close()
-        LOGGER.info("SETTING UP WTF?????")
+        #LOGGER.info("SETTING UP WTF?????")
         # session.read_transaction(lambda tx: tx.run("MATCH (t:Topic) RETURN COUNT(t)"))
         # session.write_transaction(lambda tx: tx.run("CREATE CONSTRAINT ON (a:Word) ASSERT a.Name IS UNIQUE"))
         # session.write_transaction(lambda tx: tx.run("CREATE CONSTRAINT ON (a:Topic) ASSERT a.Name IS UNIQUE"))
-        LOGGER.info("SETTING UP (2) WTF?????")
+        #LOGGER.info("SETTING UP (2) WTF?????")
         #For every word in every topic, link the word node to the topic node
         for i,topic in enumerate(topics):
             #create a discription string
@@ -78,7 +78,7 @@ class TopicModeler():
                 if(j<5):
                     des += (term[0] + ", ")
                 session.write_transaction(lambda tx: self.linkTopicWords(tx, str(i), term[0], term[1]))
-            LOGGER.info(des[:-1])
+            #LOGGER.info(des[:-1])
             session.write_transaction(lambda tx: self.addTopicDescription(tx, str(i),des[:-2]))
         return session.close()
 
