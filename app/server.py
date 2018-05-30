@@ -134,7 +134,7 @@ class TopicModeler():
         for i,topic in enumerate(doc_topics):
             #LOGGER.info('topic : ' + str(i))
             if i<self.num_topic_links:
-                con = ({'Label':'Facet','NodeType':'Topic','RelType':'HAS_FACET','RelProps':{'Weight':np.float64(topic[1])},'ForwardRel':True,'ConformedDimensions':{'Code':str(topic[0])}})
+                con = ({'Label':'Facet','NodeType':'Topic','RelType':'HAS_FACET','RelProps':{'weight':np.float32(topic[1])},'ForwardRel':True,'ConformedDimensions':{'Code':str(topic[0])}})
                 #LOGGER.info(con)
                 message['Connections'].append(con)
 
@@ -152,7 +152,7 @@ class TopicModeler():
         return 
 
     def linkTopics(self, tx, tnum, weight):
-        return tx.run("MATCH (t: Topic:Facet {Code: {tnum}}) WITH t MATCH (f: File {Uri: {key}}) MERGE (f)-[c:HAS_FACET]->(t) ON CREATE SET c.weight = {weight}",{"tnum":tnum,"key":self.prunedUri, "weight":np.float64(weight)})
+        return tx.run("MATCH (t: Topic:Facet {Code: {tnum}}) WITH t MATCH (f: File {Uri: {key}}) MERGE (f)-[c:HAS_FACET]->(t) ON CREATE SET c.weight = {weight}",{"tnum":tnum,"key":self.prunedUri, "weight":np.float32(weight)})
 
 
     def matchNode(self, tx):
