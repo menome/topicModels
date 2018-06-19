@@ -107,11 +107,11 @@ class TopicModeler():
         LOGGER.info("Attempting to extract fulltext from document")
 
         try:
-            text = session.write_transaction(self.matchNode)
+            text = session.read_transaction(self.matchNode)
             LOGGER.info("Modeling Document")
             session.close()
-        except:
-            LOGGER.info("Fulltext for document missing, skipping document.")
+        except Exception as e:
+            LOGGER.info("Error reading fullText from graph\n"  + e)
             return session.close()
 
         #LOGGER.info(text)
