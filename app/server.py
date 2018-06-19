@@ -99,8 +99,8 @@ class TopicModeler():
             #LOGGER.info("THIS IS A JPG WTF FUCK OFF")
             return 0
         #Article uri keys are the whole URL, whereas file URI's are relative location paths
-        if(data["EventType"] != "ModelArticle"):
-            self.prunedUri = self.key[self.key.find("/")+1:]
+        # if(data["EventType"] != "ModelArticle"):
+        #     self.prunedUri = self.key[self.key.find("/")+1:]
         LOGGER.info("starting session")
         #then we need to query the graph for the fulltext of that node
         session = self._driver.session()
@@ -111,7 +111,7 @@ class TopicModeler():
             LOGGER.info("Modeling Document")
             session.close()
         except Exception as e:
-            LOGGER.info("Error reading fullText from graph\n"  + e)
+            LOGGER.info("Error reading fullText from graph\n" + e)
             return session.close()
 
         #LOGGER.info(text)
@@ -156,7 +156,7 @@ class TopicModeler():
 
 
     def matchNode(self, tx):
-        return tx.run("MATCH (f: Card {Uri: {key}}) RETURN f.FullText",{"key":self.prunedUri}).single().values()
+        return tx.run("MATCH (f:Card {Uri: {key}}) RETURN f.FullText",{"key":self.prunedUri}).single().values()
 
     def matchArticleNode(self, tx):
         return tx.run("MATCH (f: Article {Uri: {key}}) RETURN f",{"key":self.prunedUri}).summary()
