@@ -107,7 +107,7 @@ class TopicModeler():
         LOGGER.info("Attempting to extract fulltext from document")
 
         try:
-            text = session.read_transaction(self.matchNode)
+            text = session.write_transaction(self.matchNode)
             LOGGER.info("Modeling Document")
             session.close()
         except:
