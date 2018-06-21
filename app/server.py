@@ -87,7 +87,7 @@ class TopicModeler():
        return tx.run("MATCH (t: Topic:Facet {Code: {tnum}}) SET t.Name = {des}",{"tnum":tnum,"des":des})
 
     def linkTopicWords(self, tx, tnum, word, weight):
-        return tx.run("MERGE (t: Topic:Facet {Code: {tnum}}) ON CREATE SET t.Uuid = apoc.create.uuid() MERGE (w: Word:Facet {Name: {word}}) ON CREATE SET w.Uuid = apoc.create.uuid() MERGE (t)-[r:HAS_FACET {weight:{weight}}]->(w)",{"tnum":tnum,"word":word, "weight":float(np.float64(weight))})
+        return tx.run("MERGE (t: Topic:Facet {Code: {tnum}}) ON CREATE SET t.Uuid = apoc.create.uuid() MERGE (w: Word:Facet {Name: {word}}) ON CREATE SET w.Uuid = apoc.create.uuid() MERGE (t)-[r:HAS_FACET {weight:{weight}}]->(w)",{"tnum":tnum,"word":word, "weight":np.float32(weight)})
 
     def modelDoc(self, data, channel):
         #input should be the message off the bus
@@ -134,7 +134,7 @@ class TopicModeler():
         for i,topic in enumerate(doc_topics):
             #LOGGER.info('topic : ' + str(i))
             if i<self.num_topic_links:
-                con = ({'Label':'Facet','NodeType':'Topic','RelType':'HAS_FACET','RelProps':{'weight':float(np.float32(topic[1]))},'ForwardRel':True,'ConformedDimensions':{'Code':str(topic[0])}})
+                con = ({'Label':'Facet','NodeType':'Topic','RelType':'HAS_FACET','RelProps':{'weight':np.float32(topic[1])},'ForwardRel':True,'ConformedDimensions':{'Code':str(topic[0])}})
                 #LOGGER.info(con)
                 message['Connections'].append(con)
 
@@ -152,7 +152,7 @@ class TopicModeler():
         return 
 
     def linkTopics(self, tx, tnum, weight):
-        return tx.run("MATCH (t: Topic:Facet {Code: {tnum}}) WITH t MATCH (f: File {Uri: {key}}) MERGE (f)-[c:HAS_FACET]->(t) ON CREATE SET c.weight = {weight}",{"tnum":tnum,"key":self.prunedUri, "weight":float(np.float32(weight))})
+        return tx.run("MATCH (t: Topic:Facet {Code: {tnum}}) WITH t MATCH (f: File {Uri: {key}}) MERGE (f)-[c:HAS_FACET]->(t) ON CREATE SET c.weight = {weight}",{"tnum":tnum,"key":self.prunedUri, "weight":np.float32(weight)})
 
 
     def matchNode(self, tx):
