@@ -87,7 +87,7 @@ class TopicModeler():
        return tx.run("MATCH (t: Topic:Facet {Code: {tnum}}) SET t.Name = {des}",{"tnum":tnum,"des":des})
 
     def linkTopicWords(self, tx, tnum, word, weight):
-        return tx.run("MERGE (t: Topic:Facet {Code: {tnum}}) ON CREATE SET t.Uuid = apoc.create.uuid() MERGE (w: Word:Facet {Name: {word}}) ON CREATE SET w.Uuid = apoc.create.uuid() MERGE (t)-[r:HAS_FACET {weight:{weight}}]->(w)",{"tnum":tnum,"word":word, "weight":np.float32(weight)})
+        return tx.run("MERGE (t: Topic:Facet {Code: {tnum}}) ON CREATE SET t.Uuid = apoc.create.uuid() MERGE (w: Word:Facet {Name: {word}}) ON CREATE SET w.Uuid = apoc.create.uuid() MERGE (t)-[r:HAS_FACET {weight:{weight}}]->(w)",{"tnum":tnum,"word":word, "weight":np.float64(weight)})
 
     def modelDoc(self, data, channel):
         #input should be the message off the bus
