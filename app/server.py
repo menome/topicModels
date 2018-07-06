@@ -93,14 +93,8 @@ class TopicModeler():
         #input should be the message off the bus
         #first we need to grab the key used to grab the node from the graph
         # LOGGER.info(data)
-        self.key = str(data["Key"])
-        self.prunedUri = str(data["Key"])
-        if".jpg" in (str(data["Key"])):
-            #LOGGER.info("THIS IS A JPG WTF FUCK OFF")
-            return 0
-        #Article uri keys are the whole URL, whereas file URI's are relative location paths
-        # if(data["EventType"] != "ModelArticle"):
-        #     self.prunedUri = self.key[self.key.find("/")+1:]
+        self.uuid = str(data["Uuid"])
+        # self.prunedUri = str(data["Path"])
         LOGGER.info("starting session")
         #then we need to query the graph for the fulltext of that node
         session = self._driver.session()
@@ -129,7 +123,7 @@ class TopicModeler():
         #LOGGER.info(doc_topics)
         #create the harvester message
         
-        message = ({'NodeType':'File','Priority':2,'ConformedDimensions':{'Uri':self.prunedUri},'Properties':{},'Connections':[]})
+        message = ({'NodeType':'File','Priority':2,'ConformedDimensions':{'Uuid':self.uuid},'Properties':{},'Connections':[]})
         #LOGGER.info(message)
         for i,topic in enumerate(doc_topics):
             #LOGGER.info('topic : ' + str(i))
@@ -152,14 +146,14 @@ class TopicModeler():
         return 
 
     def linkTopics(self, tx, tnum, weight):
-        return tx.run("MATCH (t: Topic:Facet {Code: {tnum}}) WITH t MATCH (f: File {Uri: {key}}) MERGE (f)-[c:HAS_FACET]->(t) ON CREATE SET c.weight = {weight}",{"tnum":tnum,"key":self.prunedUri, "weight":float(np.float32(weight))})
+        return tx.run("MATCH (t: Topic:Facet {Code: {tnum}}) WITH t MATCH (f: File {Uuid: {uuid}}) MERGE (f)-[c:HAS_FACET]->(t) ON CREATE SET c.weight = {weight}",{"tnum":tnum,"uuid":self.uuid, "weight":float(np.float32(weight))})
 
 
     def matchNode(self, tx):
-        return tx.run("MATCH (f:Card {Uri: {key}}) RETURN f.FullText",{"key":self.prunedUri}).single().values()
+        return tx.run("MATCH (f:Card {Uuid: {uuid}}) RETURN f.FullText",{"uuid":self.uuid}).single().values()
 
     def matchArticleNode(self, tx):
-        return tx.run("MATCH (f: Article {Uri: {key}}) RETURN f",{"key":self.prunedUri}).summary()
+        return tx.run("MATCH (f: Article {Uuid: {uuid}}) RETURN f",{"uuid":self.uuid}).summary()
 
    # def stir():
         #this function is used when we want to recoup the model and reclassify documents
@@ -185,10 +179,10 @@ class RMQConsumer(object):
     commands that were issued and that should surface in the output as well.
 
     """
-    EXCHANGE = 'topicmodeller'
+    EXCHANGE = 'fpp'
     EXCHANGE_TYPE = 'topic'
     QUEUE = 'topic_model'
-    ROUTING_KEY = 'topicmodeller.added'
+    ROUTING_KEY = 'fpp.topicmodels'
 
     def __init__(self, config):
         """Create a new instance of the consumer class, passing in the AMQP
@@ -432,13 +426,14 @@ class RMQConsumer(object):
 
         """
         #LOGGER.info('Received message # %s from %s: %s',basic_deliver.delivery_tag, properties.app_id, body)
-        LOGGER.info("Recieved message")
+        LOGGER.info("Received message")
 
         #####Here is where actual work goes!
         try:
             data = json.loads(body.encode('ascii', 'ignore'))
-            if "Delete" not in str(data["EventType"]):
-                self.tm.modelDoc(data, self._channel)
+            LOGGER.info(data)
+            # if "DELETE" not in str(data["EventType"]):
+            self.tm.modelDoc(data, self._channel)
         except:
             print "TM errored on incomming message"
             self.acknowledge_message(basic_deliver.delivery_tag)
